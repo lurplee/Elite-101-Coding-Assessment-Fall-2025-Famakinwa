@@ -1,12 +1,13 @@
 from library_books import library_books
 from datetime import datetime, timedelta
 import time
+import os 
 # Used Python Documentation to help review https://docs.python.org/3/tutorial/classes.html
+# Learned how to clear screen after each option using https://www.geeksforgeeks.org/python/clear-screen-python/
 
 
 
 books =[]
-
 
 
 class MyBook:
@@ -19,16 +20,59 @@ class MyBook:
         self.due_date = due_date
         self.checkouts = checkouts
 
+    def view_book(self):
+        return(f"\nBook ID: {self.id}\nTitle: {self.title}\nAuthor: {self.author}\n")
+        
+    def view_available_book(self):
+        if self.available == True:
+            return(f"\nBook ID: {self.id}\nTitle: {self.title}\nAuthor: {self.author}\n")
+        
+
     def return_book(self,user_id):
         if self.id == user_id:
             if self.available == True:
-                print(f"{self.title.upper()} was already returned!")
+                return(f"{self.title.upper()} by {self.author.upper()} was already returned!")
             else:
-                print(f"Book Returned! {self.id}")
-        else: 
-            return("")
+                self.available = True
+                return(f"Thanks for returning {self.title.upper()} by {self.author.upper()}!")
             
-            
+    def search_book(self, search_field, search_term):
+        if search_field.lower() == "author":
+            if self.author == search_term.title():
+                return("SUCCESS")
+
+        if search_field.lower() == "genre":
+            if self.genre == search_term.title():
+                return("SUCCESS")
+
+        else:
+            return(None)
+        
+    def view_overdue_book(self):
+         if self.due_date != None and datetime.strptime(self.due_date,"%Y-%m-%d") < datetime.now() and self.available == False:
+             return("SUCCESS")
+
+    def checkout_book(self, bookID):
+        if bookID == self.id and self.available:
+                    
+                    print(f"{self.title.upper()} by {self.author.upper()} is AVAILABLE")
+
+                    verify_checkout = input(f"Check Out {self.title.upper()}? [Y/N]: ").upper()
+                    if verify_checkout == "Y":
+                        self.checkouts += 1
+                        self.due_date = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d")
+                        self.available = False
+                        print(f"Thanks for Checking Out {self.title.upper()}!\nDue Date: {self.due_date}")
+                    
+        elif bookID ==self.id and not self.available:
+            print(f"Sorry, {self.title.upper()} is NOT AVAILABLE at the moment")
+
+                
+        else:
+            return(None)
+
+
+                
 for book_dict in library_books:
     book = MyBook(book_dict["id"], book_dict["title"], book_dict["author"], book_dict["genre"], book_dict["available"], book_dict["due_date"], book_dict["checkouts"])
     books.append(book)
@@ -43,34 +87,47 @@ class Library:
     def __init__(self):
         self.book = book
 
+    def menu_return(self):
+        input(self.divider("Press ENTER to Return to HOME",True))
+        print("\x1b[H\x1b[2J", end="") #Adapted from https://github.com/orgs/pybricks/discussions/1074
+        self.main_menu()
+
     def main_menu(self):
         menu_choice =""
-
         print(f"{self.header("MAIN MENU")}\n[1] View Books\n[2] Search Books\n[3] Checkout Book\n[4] Return Book\n[5] View Overdue Books")
-        while menu_choice not in [1,2,3,4,5] or type(menu_choice) != int :
-            menu_choice = int(input("Choice: "))
 
+        while menu_choice != None:
+            try:
+                menu_choice =int(input("Choice: "))
+                if menu_choice not in [1,2,3,4,5]:
+                    print("Invalid Choice. Please Try Again.")
+                    raise Exception("Invalid Choice")
+                    
 
-        if menu_choice == 1:
-            print(self.header("VIEW ALL BOOKS"))
-            self.view_books()
-            self.main_menu()
-        if menu_choice ==2:
-            print(self.header("SEARCH ALL BOOKS"))
-            self.search_books()
-            self.main_menu()
-        if menu_choice ==3:
-            print(self.header("CHECKOUT BOOK"))
-            self.book_checkout()
-            self.main_menu()
-        if menu_choice ==4:
-            print(self.header("RETURN BOOK"))
-            self.book_return()
-            self.main_menu()
-        if menu_choice ==5:
-            print(self.header("VIEW OVERDUE BOOKS"))
-            self.view_overdue_books()
-            self.main_menu()
+                if menu_choice == 1:
+                    print(self.header("VIEW ALL AVAILABLE BOOKS"))
+                    self.view_available_books()
+                    self.menu_return()
+                if menu_choice ==2:
+                    print(self.header("SEARCH ALL BOOKS"))
+                    self.search_books()
+                    self.menu_return()
+                if menu_choice ==3:
+                    print(self.header("CHECKOUT BOOK"))
+                    self.book_checkout()
+                    self.menu_return()
+                if menu_choice ==4:
+                    print(self.header("RETURN BOOK"))
+                    self.book_return()
+                    self.menu_return()
+                if menu_choice ==5:
+                    print(self.header("VIEW OVERDUE BOOKS"))
+                    self.view_overdue_books()
+                    self.menu_return()
+            except:
+                print(f"{self.header("MAIN MENU")}\n[1] View Books\n[2] Search Books\n[3] Checkout Book\n[4] Return Book\n[5] View Overdue Books")
+                print("Invalid Response. Please Choose a New Choice")
+
 
 
     #Adding additional function to format outputs
@@ -79,7 +136,7 @@ class Library:
 
     def divider(self, content,lines):
         if lines:
-            return(f"-------------------------------\n{content}\n-------------------------------\n")
+            return(f"===========================\n{content}\n===========================\n")
         else:
             return(f"\n{content}\n")
 
@@ -87,22 +144,12 @@ class Library:
 # TODO: Create a function to view all books that are currently available
 # Output should include book ID, title, and author
 
-    def view_books(self):
-        for book in library_books:
-            print(self.divider((f"Book ID: {book.get("id")}\nTitle: {book.get("title")}\nAuthor: {book.get("author")}"), False))
+    def view_available_books(self):
+        for book in books:
+            if book.view_available_book() != None:
+                print(self.divider(book.view_available_book(), True))
 
 # Added extra methods to view specific books by book ID & access attributes within library_books
-
-    def view_books_by_id(self,bookID):
-        for book in BookObjList:
-            if book.book_id == bookID:
-                print(self.divider((f"Book ID: {book.get("id")}\nTitle: {book.get("title")}\nAuthor: {book.get("author")}\nCheckout Status: {book.get("available")}"),False))
-
-    def book_detail(self,id,attribute):
-        for book in library_books:
-            if book.get("id") == id:
-                return(book.get(attribute))
-
 
 # -------- Level 2 --------
 # TODO: Create a function to search books by author OR genre
@@ -115,24 +162,24 @@ class Library:
             search_choice = int(input("Search by:\n[1] AUTHOR\n[2] GENRE\n"))
 
         if search_choice == 1:
-            search_filter = "author"
+            user_search_field = "author"
         if search_choice == 2:
-            search_filter = "genre"
+            user_search_field = "genre"
 
-        print(f"Searching by {search_filter.upper()}...")
+        print(f"Searching by {user_search_field.upper()}...")
         time.sleep(0.5)
-        search_term = input(f"{search_filter.title()} Name: ").title()
+        user_search_term = input(f"{user_search_field.title()} Name: ").title()
 
-        for book in library_books:
-            if search_term == book.get(search_filter):
+
+        print(self.divider(f"Searching for books with {user_search_field.upper()} name {user_search_term.upper()}...",True))
+        
+        for book in books:
+            if book.search_book(user_search_field, user_search_term) != None:
                 selected_books.append(book)
-
-#Edit this line to be cooler
-        print(self.divider(f"Searching for books with {search_filter.upper()} name {search_term.upper()}...",True))
         
         if len(selected_books) >0:
             for selected_book in selected_books:
-                print(self.divider((f"Book ID: {selected_book.get("id")}\nTitle: {selected_book.get("title")}\nAuthor: {selected_book.get("author")}"),False))
+                selected_book.view_book()
         else:
             print("NO RESULTS")
 
@@ -151,29 +198,15 @@ class Library:
 
 
     def book_checkout(self):
-        bookID_check = input("Book ID: ").upper()
+        bookID = input("Book ID: ").upper()        
+        
+        # while bookID not in books: 
+        #     print("Book ID not Found. Please Try Again.")
+        #     bookID = input("Book ID: ").upper()
 
-        if bookID_check in self.bookID_list:
-            if self.book_detail(bookID_check, "available") == True:
-                print(f"{self.book_detail(bookID_check, "title")} is AVAILABLE")
-                verify_checkout = input(f"Check Out {self.book_detail(bookID_check,"title")}? [Y/N]: ").upper()
-
-                if verify_checkout == "Y":
-                    for book in library_books:
-                        if bookID_check in book.get("id"):
-                            book["available"] = False
-                            book["checkouts"] += 1
-                            book["due_date"] = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d")
-
-                    print(self.divider(f"Thanks for Checking Out {self.book_detail(bookID_check, "title").upper()}\nDue Date: {book["due_date"]}", True))
-
-
-                else:
-                    print(f"Sorry, {self.book_detail(bookID_check, "title")} is NOT AVAILABLE")
-                
-        else:
-            print("Book Not Found.")
-
+        for book in books:
+            if book.checkout_book(bookID) != None:
+                print(book.checkout_book(bookID))
 
 
 
@@ -182,27 +215,23 @@ class Library:
 # Set its availability to True and clear the due_date
     def book_return(self):
         user_id = input("Book ID: ").upper()
+
         for book in books:
-            print(book.return_book(user_id))
+            if book.return_book(user_id) != None:
+                print(book.return_book(user_id))
         
-        # for book in library_books:
-        #     if return_bookID == book.get("id") and book.get("available") == False:
-        #         selected_book = book
-        #         selected_book["available"] == True
-        #         selected_book["due_date"] = None
-        #         print(f"Returned {selected_book.get("title").upper()}!")
-        #     if book.get("available") == True:
-        #         print("Already returned!")
+
 # TODO: Create a function to list all overdue books
 # A book is overdue if its due_date is before today AND it is still checked out
 
     def view_overdue_books(self):
         overdue_books =[]
-        for book in library_books:
-            if book["due_date"] != None and datetime.strptime(book["due_date"],"%Y-%m-%d") < datetime.now() and book["available"] == False:
+        for book in books:
+            if book.view_overdue_book() != None:
                 overdue_books.append(book)
-        print(overdue_books)
-
+        
+        for overdue_book in overdue_books:
+            print(self.divider(overdue_book.view_book(),True))
 
 
 
@@ -220,5 +249,5 @@ class Library:
 
 if __name__ == "__main__":
     myLibrary = Library()
-    myLibrary.book_return()
+    myLibrary.main_menu()
     pass
