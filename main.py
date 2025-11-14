@@ -419,6 +419,7 @@ class Library:
     # Download Book Catalog as CSV - Used https://docs.python.org/3/library/csv.html for help
     def download_catalog(self):
         checked_out =""
+        book_due_date =""
         file_name = f"{(datetime.now().strftime("%Y-%m-%d"))}_library_catalog.csv"
         with open(file_name, 'w', newline='') as csvfile:
             column_names = ["Book ID","Title", "Author", "Genre", "Checked Out", "Checkouts", "Due Date"]
@@ -430,7 +431,11 @@ class Library:
                     checked_out = "Yes"
                 else:
                     checked_out="No"
-                myWriter.writerow([book.id, book.title,book.author, book.genre, checked_out, book.checkouts, book.due_date])
+                if book.due_date != None:
+                    book_due_date =book.due_date
+                else:
+                    book_due_date = None
+                myWriter.writerow([book.id, book.title,book.author, book.genre, checked_out, book.checkouts, book_due_date])
         print(self.header(f"CSV File, {file_name} Downloaded!"))
 
 
@@ -439,7 +444,7 @@ class Library:
 # - Add a new book (via input) to the catalog DONE
 # - Sort and display the top 3 most checked-out books
 # - Partial title/author search DONE
-# - Save/load catalog to file (CSV or JSON)
+# - Save/load catalog to file (CSV or JSON) DONE
 # - Anything else you want to build on top of the system!
 
 if __name__ == "__main__":
