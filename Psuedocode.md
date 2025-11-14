@@ -50,8 +50,6 @@
 * Ask for book ID and verify that it exists (if not, reprompt)
 * Remove the book with said bookID from book list
 
-
-
 ## EXIT
 
 * Use quit() or exit()
