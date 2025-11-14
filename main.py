@@ -434,7 +434,7 @@ class Library:
                 if book.due_date != None:
                     book_due_date =book.due_date
                 else:
-                    book_due_date = None
+                    book_due_date = "None"
                 myWriter.writerow([book.id, book.title,book.author, book.genre, checked_out, book.checkouts, book_due_date])
         print(self.header(f"CSV File, {file_name} Downloaded!"))
 

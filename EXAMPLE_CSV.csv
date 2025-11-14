@@ -1,9 +1,9 @@
 Book ID,Title,Author,Genre,Checked Out,Checkouts,Due Date
-B1,The Lightning Thief,Rick Riordan,Fantasy,No,2,
+B1,The Lightning Thief,Rick Riordan,Fantasy,No,2,None
 B2,To Kill a Mockingbird,Harper Lee,Historical,Yes,5,2025-11-01
-B3,The Great Gatsby,F. Scott Fitzgerald,Classic,No,3,
-B4,1984,George Orwell,Dystopian,No,4,
-B5,Pride and Prejudice,Jane Austen,Romance,No,6,
+B3,The Great Gatsby,F. Scott Fitzgerald,Classic,No,3,None
+B4,1984,George Orwell,Dystopian,No,4,None
+B5,Pride and Prejudice,Jane Austen,Romance,No,6,None
 B6,The Hobbit,J.R.R. Tolkien,Fantasy,Yes,8,2025-11-10
-B7,Fahrenheit 451,Ray Bradbury,Science Fiction,No,1,
+B7,Fahrenheit 451,Ray Bradbury,Science Fiction,No,1,None
 B8,The Catcher in the Rye,J.D. Salinger,Coming-of-Age,Yes,3,2025-11-12
