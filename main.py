@@ -1,6 +1,7 @@
 from library_books import library_books
 from datetime import datetime, timedelta
 import time
+import csv
 # Used Python Documentation to help review https://docs.python.org/3/tutorial/classes.html
 # Learned how to clear screen after each option using https://www.geeksforgeeks.org/python/clear-screen-python/
 
@@ -97,7 +98,7 @@ class MyBook:
             edited_info=""
             edit_category=""
 
-            while change_choice != None:
+            while True:
                 try:
 
                     change_choice =int(input("\n[1] Author\n[2] Title\n[3] Genre\n[4] EXIT\n"))
@@ -157,19 +158,19 @@ class Library:
     
     # Returning to Menu after each Action
     def menu_return(self):
-        input(self.divider("Press ENTER to Return to HOME",True))
+        input(self.divider("Press ENTER to Return to HOME",True)+"\n")
         print("\x1b[H\x1b[2J", end="") #Adapted from https://github.com/orgs/pybricks/discussions/1074
         self.main_menu()
 
     # Creating a Main Menu
     def main_menu(self):
         menu_choice =""
-        print(f"{self.header("WELCOME TO LIBRARY MANAGER")}\n[1] View Available Books\n[2] Search Books\n[3] Checkout Book\n[4] Return Book\n[5] View Overdue Books\n[6] Modify Book List")
+        print(f"{self.header("WELCOME TO LIBRARY MANAGER")}\n[1] View Available Books\n[2] Search Books\n[3] Checkout Book\n[4] Return Book\n[5] View Overdue Books\n[6] Modify Book List\n[7] Download Catalog as CSV\n[8] EXIT")
 
-        while menu_choice != None:
+        while True:
             try:
                 menu_choice =int(input("Choice: "))
-                if menu_choice not in [1,2,3,4,5,6]:
+                if menu_choice not in [1,2,3,4,5,6,7,8]:
                     raise Exception("Invalid Choice")
                     
 
@@ -196,8 +197,14 @@ class Library:
                 if menu_choice ==6:
                     self.modify_book_list()
                     self.menu_return()
+                if menu_choice ==7:
+                    self.download_catalog()
+                    self.menu_return()
+                if menu_choice ==8:
+                    print(self.header("Thank you for using Library Manager. Goodbye!"))
+                    return(False)
             except:
-                print(f"{self.header("WELCOME TO LIBRARY MANAGER")}\n[1] View Available Books\n[2] Search Books\n[3] Checkout Book\n[4] Return Book\n[5] View Overdue Books\n[6] Modify Book List")
+                print(f"{self.header("WELCOME TO LIBRARY MANAGER")}\n[1] View Available Books\n[2] Search Books\n[3] Checkout Book\n[4] Return Book\n[5] View Overdue Books\n[6] Modify Book List\n[7] Download Catalog as CSV\n[8] EXIT")
                 print("Invalid Response. Please Choose a New Choice")
 
 
@@ -341,7 +348,7 @@ class Library:
     def modify_book_list(self):
 
         modify_choice =1
-        while modify_choice != None:
+        while True:
             try:
                 print(self.header("MODIFY BOOK"))
                 modify_choice =int(input("[1] Edit Book\n[2] Add Book\n[3] Remove Book\n[4] EXIT\n"))
@@ -353,7 +360,6 @@ class Library:
                     bookID = input("Book ID: ").upper()
                     self.verify_id(bookID)
 
-
                     print(self.header("Current Book Info"))
                     for book in books:
                         if bookID == book.id:
@@ -363,7 +369,7 @@ class Library:
                         print(self.header("EDIT BOOK BY"))
                         self.edit_books(bookID)
                     if modify_choice ==3:
-                        print(self.header("REMOVE BOOK"))
+                        print(self.header("REMOVED BOOK"))
                         self.remove_books(bookID)
                 
                 if modify_choice ==2:
@@ -388,7 +394,14 @@ class Library:
 
     
     def add_books(self):
-        new_bookID = f"B{len(books)+1}"
+        #Necessary so that the new book's id is correct even if a book is removed
+        for book in books:
+            num=int(book.id[1])
+            max_bookID =0
+            if num > max_bookID:
+                max_bookID = num
+                
+        new_bookID = f"B{max_bookID+1}"
         new_book_title = input("Book Title: ").title()
         new_book_author = input("Book Author: ").title()
         new_book_genre = input("Book Genre: ").title()
@@ -400,10 +413,26 @@ class Library:
 
     def remove_books(self,bookID):
         for book in books:
-            if book.id == bookID :
+            if book.id.upper() == bookID :
                 print(self.divider(f"{book.title.upper()} has been removed!", True))
                 books.remove(book)
-        
+    # Download Book Catalog as CSV - Used https://docs.python.org/3/library/csv.html for help
+    def download_catalog(self):
+        checked_out =""
+        file_name = f"{(datetime.now().strftime("%Y-%m-%d"))}_library_catalog.csv"
+        with open(file_name, 'w', newline='') as csvfile:
+            column_names = ["Book ID","Title", "Author", "Genre", "Checked Out", "Checkouts", "Due Date"]
+            myWriter = csv.writer(csvfile)
+
+            myWriter.writerow(column_names)
+            for book in books:
+                if book.available == False:
+                    checked_out = "Yes"
+                else:
+                    checked_out="No"
+                myWriter.writerow([book.id, book.title,book.author, book.genre, checked_out, book.checkouts, book.due_date])
+        print(self.header(f"CSV File, {file_name} Downloaded!"))
+
 
 # -------- Optional Advanced Features --------
 # You can implement these to move into Tier 4:
